@@ -40,36 +40,41 @@ export default function AudioPlayer({ src, duration: initialDuration }: AudioPla
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
+    if (isPlaying) { audio.pause(); } else { audio.play(); }
     setIsPlaying(!isPlaying);
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl min-w-[200px] max-w-[300px]" style={{ background: 'var(--bg-primary)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, minWidth: 220, maxWidth: 320, background: '#131B36' }}>
       <audio ref={audioRef} src={src} preload="metadata" />
       <button
         onClick={togglePlay}
-        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white"
-        style={{ background: 'var(--accent)' }}
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          color: '#fff',
+          fontSize: 14,
+          border: 'none',
+          cursor: 'pointer',
+          background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
+        }}
       >
         {isPlaying ? '⏸' : '▶'}
       </button>
-      <div className="flex-1 min-w-0">
-        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${progress}%`, background: 'var(--accent)' }}
-          />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ height: 6, borderRadius: 3, overflow: 'hidden', background: 'rgba(255,255,255,0.1)' }}>
+          <div style={{ height: '100%', borderRadius: 3, transition: 'width 100ms', width: `${progress}%`, background: '#3B82F6' }} />
         </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{formatTime(currentTime)}</span>
-          <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{formatTime(duration)}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+          <span style={{ fontSize: 11, color: '#5E6D93', fontVariantNumeric: 'tabular-nums' }}>{formatTime(currentTime)}</span>
+          <span style={{ fontSize: 11, color: '#5E6D93', fontVariantNumeric: 'tabular-nums' }}>{formatTime(duration)}</span>
         </div>
       </div>
     </div>

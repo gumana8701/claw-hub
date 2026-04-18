@@ -24,25 +24,20 @@ export default function FilePreview({ fileUrl, fileName, fileSize, fileType, aud
   if (fileType?.startsWith('image/')) {
     return (
       <>
-        <div className="cursor-pointer" onClick={() => setShowLightbox(true)}>
+        <div style={{ cursor: 'pointer' }} onClick={() => setShowLightbox(true)}>
           <img
             src={fileUrl}
             alt={fileName || 'Image'}
-            className="max-w-[300px] max-h-[300px] rounded-xl object-cover"
+            style={{ maxWidth: 300, maxHeight: 300, borderRadius: 12, objectFit: 'cover' }}
             loading="lazy"
           />
         </div>
         {showLightbox && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 cursor-pointer"
-            style={{ background: 'rgba(0,0,0,0.9)' }}
             onClick={() => setShowLightbox(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, cursor: 'pointer', background: 'rgba(0,0,0,0.9)' }}
           >
-            <img
-              src={fileUrl}
-              alt={fileName || 'Image'}
-              className="max-w-full max-h-full object-contain"
-            />
+            <img src={fileUrl} alt={fileName || 'Image'} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
           </div>
         )}
       </>
@@ -52,12 +47,7 @@ export default function FilePreview({ fileUrl, fileName, fileSize, fileType, aud
   // Video
   if (fileType?.startsWith('video/')) {
     return (
-      <video
-        src={fileUrl}
-        controls
-        className="max-w-[300px] rounded-xl"
-        preload="metadata"
-      />
+      <video src={fileUrl} controls preload="metadata" style={{ maxWidth: 300, borderRadius: 12 }} />
     );
   }
 
@@ -67,23 +57,28 @@ export default function FilePreview({ fileUrl, fileName, fileSize, fileType, aud
       href={fileUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 p-3 rounded-xl max-w-[300px] transition-colors no-underline"
-      style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '12px 16px',
+        borderRadius: 12,
+        maxWidth: 300,
+        textDecoration: 'none',
+        background: '#131B36',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}
     >
-      <span className="text-2xl flex-shrink-0">{getFileIcon(fileType)}</span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm truncate font-medium" style={{ color: 'var(--text-primary)' }}>
+      <span style={{ fontSize: 24, flexShrink: 0 }}>{getFileIcon(fileType)}</span>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <p style={{ fontSize: 13, fontWeight: 500, color: '#CBD5E1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
           {fileName || 'File'}
         </p>
         {fileSize && (
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            {formatFileSize(fileSize)}
-          </p>
+          <p style={{ fontSize: 11, color: '#5E6D93', margin: '2px 0 0' }}>{formatFileSize(fileSize)}</p>
         )}
       </div>
-      <span className="text-sm" style={{ color: 'var(--text-muted)' }}>↓</span>
+      <span style={{ fontSize: 14, color: '#5E6D93' }}>↓</span>
     </a>
   );
 }
