@@ -66,14 +66,14 @@ export default function FileUpload({ onUploaded }: FileUploadProps) {
       {uploading ? (
         <div
           style={{
-            width: 34,
-            height: 34,
-            borderRadius: 8,
+            width: 38,
+            height: 38,
+            borderRadius: 10,
             background: '#1E2849',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 700,
             color: '#3B82F6',
           }}
@@ -84,21 +84,21 @@ export default function FileUpload({ onUploaded }: FileUploadProps) {
         <button
           onClick={() => inputRef.current?.click()}
           style={{
-            width: 34,
-            height: 34,
-            borderRadius: 8,
+            width: 38,
+            height: 38,
+            borderRadius: 10,
             background: 'transparent',
             border: 'none',
             color: '#5E6D93',
             cursor: 'pointer',
-            fontSize: 16,
+            fontSize: 18,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
           onMouseEnter={(e) => { e.currentTarget.style.background = '#1E2849'; e.currentTarget.style.color = '#8E9CBC'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#5E6D93'; }}
-          title="Attach file"
+          title="Adjuntar archivo"
         >
           📎
         </button>

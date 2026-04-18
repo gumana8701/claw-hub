@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Message } from '@/types/database';
 import MessageItem from './MessageItem';
+import ThinkingIndicator from './ThinkingIndicator';
 
 interface MessageListProps {
   messages: Message[];
@@ -10,9 +11,11 @@ interface MessageListProps {
   hasMore: boolean;
   onLoadMore: () => void;
   currentUserId: string | null;
+  agentThinking?: boolean;
+  pendingCount?: number;
 }
 
-export default function MessageList({ messages, loading, hasMore, onLoadMore, currentUserId }: MessageListProps) {
+export default function MessageList({ messages, loading, hasMore, onLoadMore, currentUserId, agentThinking, pendingCount }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -24,6 +27,13 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
     }
     prevMessageCount.current = messages.length;
   }, [messages.length, autoScroll]);
+
+  // Also scroll when thinking state changes
+  useEffect(() => {
+    if (autoScroll && agentThinking) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [agentThinking, autoScroll]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView();
@@ -47,18 +57,17 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
         padding: '24px 0',
       }}
     >
-      {/* Centered content container — like Discord's max-width chat */}
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 32px', width: '100%' }}>
         {loading && messages.length === 0 ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
-            <p style={{ fontSize: 14, color: '#5E6D93' }}>Loading messages...</p>
+            <p style={{ fontSize: 14, color: '#5E6D93' }}>Cargando mensajes...</p>
           </div>
         ) : messages.length === 0 ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 40, marginBottom: 16 }}>💬</div>
               <p style={{ fontSize: 15, color: '#5E6D93', lineHeight: 1.6 }}>
-                No messages yet.<br />Start the conversation!
+                Sin mensajes aún.<br />¡Empieza la conversación!
               </p>
             </div>
           </div>
@@ -70,7 +79,7 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
                   onClick={onLoadMore}
                   style={{
                     fontSize: 12,
-                    padding: '6px 20px',
+                    padding: '8px 24px',
                     borderRadius: 9999,
                     background: '#131B36',
                     color: '#8E9CBC',
@@ -78,7 +87,7 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
                     cursor: 'pointer',
                   }}
                 >
-                  Load older messages
+                  Cargar mensajes anteriores
                 </button>
               </div>
             )}
@@ -89,6 +98,11 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
                 isOwn={msg.sender_id === currentUserId}
               />
             ))}
+
+            {/* Thinking indicator — shows at bottom of messages */}
+            {agentThinking && (
+              <ThinkingIndicator pendingCount={pendingCount || 0} />
+            )}
           </div>
         )}
         <div ref={bottomRef} />

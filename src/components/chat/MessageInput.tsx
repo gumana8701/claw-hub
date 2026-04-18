@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import AudioRecorder from './AudioRecorder';
 import FileUpload from './FileUpload';
 import { createClient } from '@/lib/supabase/client';
@@ -25,6 +25,13 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const supabase = createClient();
+
+  // Listen for cancel audio mode event from AudioRecorder
+  useEffect(() => {
+    const handler = () => setShowAudio(false);
+    window.addEventListener('cancelAudioMode', handler);
+    return () => window.removeEventListener('cancelAudioMode', handler);
+  }, []);
 
   const handleSend = useCallback(async () => {
     const trimmed = text.trim();
@@ -52,18 +59,24 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
   };
 
+  const getMimeExtension = (type: string) => {
+    const map: Record<string, string> = { 'audio/webm': 'webm', 'audio/mp4': 'm4a', 'audio/ogg': 'ogg' };
+    return map[type] || 'webm';
+  };
+
   const handleAudioRecorded = async (blob: Blob, duration: number) => {
     setShowAudio(false);
     const ts = Date.now();
-    const path = `audio-${ts}.webm`;
+    const ext = getMimeExtension(blob.type);
+    const path = `audio-${ts}.${ext}`;
     const { data: { session } } = await supabase.auth.getSession();
     await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/attachments/${path}`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${session?.access_token}`, 'Content-Type': 'audio/webm', 'x-upsert': 'true' },
+      headers: { Authorization: `Bearer ${session?.access_token}`, 'Content-Type': blob.type || 'audio/webm', 'x-upsert': 'true' },
       body: blob,
     });
     const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(path);
-    await onSendFile({ message_type: 'audio', file_url: urlData.publicUrl, file_name: `audio-${ts}.webm`, file_size: blob.size, file_type: 'audio/webm', audio_duration: duration });
+    await onSendFile({ message_type: 'audio', file_url: urlData.publicUrl, file_name: `audio-${ts}.${ext}`, file_size: blob.size, file_type: blob.type || 'audio/webm', audio_duration: duration });
   };
 
   const handleFileUploaded = async (data: { file_url: string; file_name: string; file_size: number; file_type: string; message_type: 'file' | 'image' | 'audio'; }) => {
@@ -96,7 +109,7 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
 
   if (showAudio) {
     return (
-      <div style={{ padding: '16px 32px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', background: '#050A1A' }}>
+      <div className="safe-bottom" style={{ padding: '16px 32px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', background: '#050A1A', flexShrink: 0 }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <AudioRecorder onRecorded={handleAudioRecorded} />
         </div>
@@ -127,21 +140,21 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
           <button
             onClick={() => setShowAudio(true)}
             style={{
-              width: 34,
-              height: 34,
-              borderRadius: 8,
+              width: 38,
+              height: 38,
+              borderRadius: 10,
               background: 'transparent',
               border: 'none',
               color: '#5E6D93',
               cursor: 'pointer',
-              fontSize: 16,
+              fontSize: 18,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.background = '#1E2849'; e.currentTarget.style.color = '#8E9CBC'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#5E6D93'; }}
-            title="Record audio"
+            title="Grabar audio"
           >
             🎤
           </button>
@@ -156,7 +169,7 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
           onPaste={handlePaste}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="Type a message..."
+          placeholder="Escribe un mensaje..."
           rows={1}
           style={{
             flex: 1,
@@ -164,9 +177,9 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
             border: 'none',
             outline: 'none',
             color: '#fff',
-            fontSize: 14,
+            fontSize: 15,
             lineHeight: '22px',
-            padding: '6px 0',
+            padding: '8px 0',
             resize: 'none',
             maxHeight: 120,
             fontFamily: 'inherit',
@@ -178,14 +191,14 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
           onClick={handleSend}
           disabled={!text.trim() || sending}
           style={{
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             borderRadius: 9999,
             background: text.trim() && !sending ? 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)' : '#131B36',
             color: text.trim() && !sending ? '#fff' : '#5E6D93',
             border: 'none',
             cursor: text.trim() && !sending ? 'pointer' : 'default',
-            fontSize: 16,
+            fontSize: 18,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

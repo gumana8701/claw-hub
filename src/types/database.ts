@@ -15,6 +15,8 @@ export interface Channel {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  agent_status?: 'idle' | 'thinking' | 'error';
+  agent_status_updated_at?: string;
 }
 
 export interface Message {
@@ -29,6 +31,7 @@ export interface Message {
   file_size: number | null;
   file_type: string | null;
   audio_duration: number | null;
+  status?: 'sent' | 'queued' | 'processing' | 'done' | 'error';
   created_at: string;
   profiles?: Profile;
 }

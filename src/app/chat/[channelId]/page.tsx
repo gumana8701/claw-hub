@@ -9,14 +9,15 @@ import MessageInput from '@/components/chat/MessageInput';
 import type { Channel, Message } from '@/types/database';
 
 function getInitials(name: string): string {
-  return name.split(/[\s-]+/).filter(Boolean).map((w) => w[0]).join('').toUpperCase().slice(0, 2);
+  const clean = name.replace(/^\d+\s*[·\-]\s*/, '');
+  return clean.split(/[\s-]+/).filter(Boolean).map((w) => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
 export default function ChannelPage() {
   const params = useParams();
   const channelId = params.channelId as string;
   const supabase = createClient();
-  const { messages, loading, hasMore, loadMore, sendMessage } = useMessages(channelId);
+  const { messages, loading, hasMore, loadMore, sendMessage, pendingCount, agentThinking } = useMessages(channelId);
   const [channel, setChannel] = useState<Channel | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -50,7 +51,7 @@ export default function ChannelPage() {
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-      {/* Channel header — Discord style: 48px with channel name */}
+      {/* Channel header */}
       <div
         style={{
           display: 'flex',
@@ -82,7 +83,7 @@ export default function ChannelPage() {
             >
               {getInitials(channel.name)}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', lineHeight: '20px' }}>
                 {channel.name}
               </div>
@@ -92,6 +93,26 @@ export default function ChannelPage() {
                 </div>
               )}
             </div>
+
+            {/* Status badge */}
+            {agentThinking && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '4px 12px',
+                  borderRadius: 9999,
+                  background: 'rgba(59,130,246,0.1)',
+                  flexShrink: 0,
+                }}
+              >
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B82F6', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6' }}>
+                  Pensando{pendingCount > 1 ? ` · ${pendingCount} en cola` : ''}
+                </span>
+              </div>
+            )}
           </>
         ) : (
           <div style={{ height: 20, width: 140, borderRadius: 6, background: '#131B36' }} />
@@ -105,10 +126,19 @@ export default function ChannelPage() {
         hasMore={hasMore}
         onLoadMore={loadMore}
         currentUserId={userId}
+        agentThinking={agentThinking}
+        pendingCount={pendingCount}
       />
 
       {/* Input */}
       <MessageInput onSendText={handleSendText} onSendFile={handleSendFile} />
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 }
