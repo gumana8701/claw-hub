@@ -53,12 +53,11 @@ export function useMessages(channelId: string) {
   const startThinkingTimeout = useCallback(() => {
     clearThinkingTimeout();
     thinkingTimeoutRef.current = setTimeout(() => {
-      // After 30s with no response, mark agent as offline
       setAgentThinking(false);
       setAgentOffline(true);
       pendingIdsRef.current.clear();
       setPendingCount(0);
-    }, 30000);
+    }, 60000); // 60s timeout (agent webhook has 55s)
   }, [clearThinkingTimeout]);
 
   useEffect(() => {
@@ -89,7 +88,6 @@ export function useMessages(channelId: string) {
         async (payload) => {
           const newMsg = payload.new as Message;
 
-          // If agent responded, clear all pending + timeout
           if (newMsg.sender_type === 'agent') {
             pendingIdsRef.current.clear();
             setPendingCount(0);
@@ -138,6 +136,7 @@ export function useMessages(channelId: string) {
     setAgentOffline(false);
     startThinkingTimeout();
 
+    // Insert message into DB
     const { error } = await supabase.from('messages').insert({
       channel_id: channelId,
       sender_id: user?.id,
@@ -154,6 +153,21 @@ export function useMessages(channelId: string) {
       }
       throw error;
     }
+
+    // Fire-and-forget: call agent webhook via our API
+    fetch(`/api/agent/${channelId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: data.content,
+        message_type: data.message_type,
+        file_url: data.file_url,
+        file_name: data.file_name,
+      }),
+    }).catch((err) => {
+      console.error('Agent call failed:', err);
+      // Don't throw — message is already saved, agent will process when available
+    });
   };
 
   return { messages, loading, hasMore, loadMore, sendMessage, pendingCount, agentThinking, agentOffline };
