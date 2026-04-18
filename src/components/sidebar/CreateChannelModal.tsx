@@ -14,14 +14,11 @@ interface CreateChannelModalProps {
   }) => Promise<void>;
 }
 
-const ICONS = ['🤖', '⚡', '🧠', '🔥', '💬', '🛠️', '📊', '🎯', '🌐', '🔮', '🚀', '💎'];
-
 export default function CreateChannelModal({ isOpen, onClose, onCreate }: CreateChannelModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [webhookUrl, setWebhookUrl] = useState('');
   const [agentName, setAgentName] = useState('');
-  const [icon, setIcon] = useState('🤖');
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -36,13 +33,11 @@ export default function CreateChannelModal({ isOpen, onClose, onCreate }: Create
         description: description.trim() || undefined,
         agent_webhook_url: webhookUrl.trim() || undefined,
         agent_name: agentName.trim() || undefined,
-        icon,
       });
       setName('');
       setDescription('');
       setWebhookUrl('');
       setAgentName('');
-      setIcon('🤖');
       onClose();
     } catch (err) {
       console.error(err);
@@ -51,83 +46,105 @@ export default function CreateChannelModal({ isOpen, onClose, onCreate }: Create
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    borderRadius: 'var(--radius-md)',
+    fontSize: 14,
+    outline: 'none',
+    background: 'var(--bg-app)',
+    color: 'var(--text-primary)',
+    border: '1px solid var(--border-default)',
+    fontFamily: 'inherit',
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ padding: 16, background: 'rgba(5,10,26,0.8)' }}
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-md rounded-2xl p-6"
-        style={{ background: 'var(--bg-tertiary)' }}
+        style={{
+          width: '100%',
+          maxWidth: 420,
+          borderRadius: 'var(--radius-lg)',
+          padding: 24,
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
+          boxShadow: 'var(--shadow-md)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-bold mb-4">New Channel</h2>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>Icon</label>
-            <div className="flex flex-wrap gap-2">
-              {ICONS.map((i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setIcon(i)}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-lg transition-all"
-                  style={{
-                    background: icon === i ? 'var(--accent)' : 'var(--bg-primary)',
-                    border: icon === i ? 'none' : '1px solid var(--border)',
-                  }}
-                >
-                  {i}
-                </button>
-              ))}
-            </div>
-          </div>
-
+        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, fontFamily: "'Satoshi', 'Inter', system-ui, sans-serif" }}>
+          New Channel
+        </h2>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <input
             type="text"
             placeholder="Channel name *"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full px-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-            style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            style={inputStyle}
           />
           <input
             type="text"
             placeholder="Agent name (optional)"
             value={agentName}
             onChange={(e) => setAgentName(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-            style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            style={inputStyle}
           />
           <input
             type="text"
             placeholder="Description (optional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-            style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            style={inputStyle}
           />
           <input
             type="url"
             placeholder="Agent webhook URL (optional)"
             value={webhookUrl}
             onChange={(e) => setWebhookUrl(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-            style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            style={inputStyle}
           />
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex" style={{ gap: 12, paddingTop: 8 }}>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl text-sm font-medium"
-              style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 14,
+                fontWeight: 500,
+                background: 'var(--bg-surface-raised)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-subtle)',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
-              style={{ background: 'var(--accent)' }}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 14,
+                fontWeight: 600,
+                background: 'var(--gradient-brand)',
+                color: '#fff',
+                border: 'none',
+                cursor: loading || !name.trim() ? 'not-allowed' : 'pointer',
+                opacity: loading || !name.trim() ? 0.5 : 1,
+                fontFamily: 'inherit',
+              }}
             >
               {loading ? '...' : 'Create'}
             </button>

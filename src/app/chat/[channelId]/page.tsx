@@ -6,7 +6,16 @@ import { createClient } from '@/lib/supabase/client';
 import { useMessages } from '@/lib/hooks/useMessages';
 import MessageList from '@/components/chat/MessageList';
 import MessageInput from '@/components/chat/MessageInput';
-import type { Channel } from '@/types/database';
+import type { Channel, Message } from '@/types/database';
+
+function getInitials(name: string): string {
+  return name
+    .split(/[\s-]+/)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
 
 export default function ChannelPage() {
   const params = useParams();
@@ -41,30 +50,50 @@ export default function ChannelPage() {
     file_type: string;
     audio_duration?: number;
   }) => {
-    await sendMessage(data as Partial<import('@/types/database').Message>);
+    await sendMessage(data as Partial<Message>);
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* Channel header */}
+    <div className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
+      {/* Chat header */}
       <div
-        className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
-        style={{ borderBottom: '1px solid var(--border)' }}
+        className="flex items-center flex-shrink-0"
+        style={{
+          height: 64,
+          padding: '0 24px',
+          borderBottom: '1px solid var(--border-subtle)',
+          gap: 12,
+        }}
       >
         {channel ? (
           <>
-            <span className="text-lg">{channel.icon}</span>
-            <div className="min-w-0">
-              <h2 className="text-sm font-bold truncate">{channel.name}</h2>
+            <div
+              className="flex items-center justify-center flex-shrink-0"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-surface-raised)',
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+              }}
+            >
+              {getInitials(channel.name)}
+            </div>
+            <div className="flex flex-col" style={{ gap: 2 }}>
+              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+                {channel.name}
+              </span>
               {channel.description && (
-                <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-tertiary)' }}>
                   {channel.description}
-                </p>
+                </span>
               )}
             </div>
           </>
         ) : (
-          <div className="h-5 w-32 rounded animate-pulse" style={{ background: 'var(--bg-tertiary)' }} />
+          <div style={{ height: 20, width: 128, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface-raised)' }} />
         )}
       </div>
 

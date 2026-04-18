@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback } from 'react';
+import { Paperclip } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 interface FileUploadProps {
@@ -28,14 +29,7 @@ export default function FileUpload({ onUploaded }: FileUploadProps) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const filePath = `${timestamp}-${safeName}`;
 
-      // Use XHR for progress tracking
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const formData = new FormData();
-      formData.append('', file);
-
+      const { data: { session } } = await supabase.auth.getSession();
       const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/attachments/${filePath}`;
 
       await new Promise<void>((resolve, reject) => {
@@ -43,13 +37,9 @@ export default function FileUpload({ onUploaded }: FileUploadProps) {
         xhr.open('POST', url);
         xhr.setRequestHeader('Authorization', `Bearer ${session?.access_token}`);
         xhr.setRequestHeader('x-upsert', 'true');
-
         xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            setProgress(Math.round((e.loaded / e.total) * 100));
-          }
+          if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
         };
-
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) resolve();
           else reject(new Error(`Upload failed: ${xhr.status}`));
@@ -87,36 +77,47 @@ export default function FileUpload({ onUploaded }: FileUploadProps) {
 
   return (
     <div className="relative">
-      <input
-        ref={inputRef}
-        type="file"
-        onChange={handleChange}
-        className="hidden"
-        accept="*/*"
-      />
+      <input ref={inputRef} type="file" onChange={handleChange} className="hidden" accept="*/*" />
       {uploading ? (
-        <div className="w-10 h-10 rounded-full flex items-center justify-center relative" style={{ background: 'var(--bg-tertiary)' }}>
-          <svg className="w-6 h-6 -rotate-90" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" fill="none" stroke="var(--border)" strokeWidth="2" />
+        <div
+          className="flex items-center justify-center relative"
+          style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: 'var(--bg-surface-hover)' }}
+        >
+          <svg className="-rotate-90" width="20" height="20" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="var(--border-default)" strokeWidth="2" />
             <circle
               cx="12" cy="12" r="10" fill="none"
-              stroke="var(--accent)" strokeWidth="2"
+              stroke="var(--accent-blue)" strokeWidth="2"
               strokeDasharray={`${progress * 0.628} 62.8`}
               strokeLinecap="round"
             />
           </svg>
-          <span className="absolute text-[8px] font-bold" style={{ color: 'var(--text-secondary)' }}>
-            {progress}
-          </span>
         </div>
       ) : (
         <button
           onClick={() => inputRef.current?.click()}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-lg transition-colors flex-shrink-0"
-          style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
+          className="flex items-center justify-center"
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 'var(--radius-md)',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--text-tertiary)',
+            cursor: 'pointer',
+            transition: 'all 150ms',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--bg-surface-hover)';
+            e.currentTarget.style.color = 'var(--text-secondary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = 'var(--text-tertiary)';
+          }}
           title="Attach file"
         >
-          📎
+          <Paperclip size={16} />
         </button>
       )}
     </div>

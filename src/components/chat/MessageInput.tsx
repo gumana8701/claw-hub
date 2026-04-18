@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
+import { Paperclip, Mic, ArrowUp } from 'lucide-react';
 import AudioRecorder from './AudioRecorder';
 import FileUpload from './FileUpload';
 import { createClient } from '@/lib/supabase/client';
@@ -21,6 +22,7 @@ interface MessageInputProps {
 export default function MessageInput({ onSendText, onSendFile }: MessageInputProps) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const supabase = createClient();
 
@@ -51,19 +53,17 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
-    // Auto-resize
     const el = e.target;
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
   };
 
   const handleAudioRecorded = async (blob: Blob, duration: number) => {
+    setShowAudioRecorder(false);
     const timestamp = Date.now();
     const filePath = `audio-${timestamp}.webm`;
 
     const { data: { session } } = await supabase.auth.getSession();
-
-    // Upload audio
     const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/attachments/${filePath}`;
     await fetch(url, {
       method: 'POST',
@@ -76,7 +76,6 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
     });
 
     const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(filePath);
-
     await onSendFile({
       message_type: 'audio',
       file_url: urlData.publicUrl,
@@ -97,23 +96,18 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
     await onSendFile(data);
   };
 
-  // Handle paste for images
   const handlePaste = async (e: React.ClipboardEvent) => {
     const items = e.clipboardData?.items;
     if (!items) return;
-
     for (const item of Array.from(items)) {
       if (item.type.startsWith('image/')) {
         e.preventDefault();
         const file = item.getAsFile();
         if (!file) continue;
-
         const timestamp = Date.now();
         const ext = file.type.split('/')[1] || 'png';
         const filePath = `paste-${timestamp}.${ext}`;
-
         const { data: { session } } = await supabase.auth.getSession();
-
         const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/attachments/${filePath}`;
         await fetch(url, {
           method: 'POST',
@@ -124,9 +118,7 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
           },
           body: file,
         });
-
         const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(filePath);
-
         await onSendFile({
           message_type: 'image',
           file_url: urlData.publicUrl,
@@ -139,38 +131,113 @@ export default function MessageInput({ onSendText, onSendFile }: MessageInputPro
     }
   };
 
-  return (
-    <div className="px-4 py-3 safe-bottom" style={{ borderTop: '1px solid var(--border)' }}>
-      <div className="flex items-end gap-2 max-w-4xl mx-auto">
-        <FileUpload onUploaded={handleFileUploaded} />
-        <AudioRecorder onRecorded={handleAudioRecorded} />
+  if (showAudioRecorder) {
+    return (
+      <div style={{ padding: '16px 32px 24px 32px', borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-app)' }}>
+        <div style={{ maxWidth: 780, margin: '0 auto' }}>
+          <AudioRecorder onRecorded={handleAudioRecorded} />
+        </div>
+      </div>
+    );
+  }
 
-        <div className="flex-1 relative">
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={handleTextareaChange}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            placeholder="Type a message..."
-            rows={1}
-            className="w-full px-4 py-2.5 rounded-2xl text-sm resize-none outline-none"
+  return (
+    <div className="safe-bottom" style={{ padding: '16px 32px 24px 32px', borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-app)' }}>
+      <div
+        style={{
+          maxWidth: 780,
+          margin: '0 auto',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '8px 8px 8px 12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          transition: 'border-color 150ms',
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = 'var(--accent-blue)';
+          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.15)';
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            e.currentTarget.style.borderColor = 'var(--border-default)';
+            e.currentTarget.style.boxShadow = 'none';
+          }
+        }}
+      >
+        {/* Action buttons */}
+        <div className="flex" style={{ gap: 4 }}>
+          <FileUpload onUploaded={handleFileUploaded} />
+          <button
+            onClick={() => setShowAudioRecorder(true)}
+            className="flex items-center justify-center"
             style={{
-              background: 'var(--bg-tertiary)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border)',
-              maxHeight: '120px',
+              width: 32,
+              height: 32,
+              borderRadius: 'var(--radius-md)',
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-tertiary)',
+              cursor: 'pointer',
+              transition: 'all 150ms',
             }}
-          />
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--bg-surface-hover)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--text-tertiary)';
+            }}
+            title="Record audio"
+          >
+            <Mic size={16} />
+          </button>
         </div>
 
+        {/* Input */}
+        <textarea
+          ref={textareaRef}
+          value={text}
+          onChange={handleTextareaChange}
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
+          placeholder="Type a message..."
+          rows={1}
+          style={{
+            flex: 1,
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            color: 'var(--text-primary)',
+            fontSize: 14,
+            padding: '8px 4px',
+            resize: 'none',
+            maxHeight: 120,
+            fontFamily: 'inherit',
+          }}
+        />
+
+        {/* Send button */}
         <button
           onClick={handleSend}
           disabled={!text.trim() || sending}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0 transition-opacity disabled:opacity-30"
-          style={{ background: 'var(--accent)' }}
+          className="flex items-center justify-center flex-shrink-0"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 'var(--radius-pill)',
+            background: 'var(--gradient-brand)',
+            color: '#fff',
+            border: 'none',
+            cursor: text.trim() && !sending ? 'pointer' : 'not-allowed',
+            opacity: text.trim() && !sending ? 1 : 0.4,
+            transition: 'opacity 150ms',
+          }}
         >
-          ↑
+          <ArrowUp size={16} />
         </button>
       </div>
     </div>

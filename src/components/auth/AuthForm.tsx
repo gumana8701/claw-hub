@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { Zap } from 'lucide-react';
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -40,25 +41,54 @@ export default function AuthForm() {
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    borderRadius: 'var(--radius-md)',
+    fontSize: 14,
+    outline: 'none',
+    background: 'var(--bg-app)',
+    color: 'var(--text-primary)',
+    border: '1px solid var(--border-default)',
+    transition: 'border-color 150ms',
+    fontFamily: 'inherit',
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--bg-primary)' }}>
-      <div className="w-full max-w-md rounded-2xl p-10" style={{ background: 'var(--bg-tertiary)' }}>
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold mb-3">⚡ ClawHub</h1>
-          <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ padding: 24, background: 'var(--bg-app)' }}>
+      <div style={{ width: '100%', maxWidth: 400, borderRadius: 'var(--radius-lg)', padding: 40, background: 'var(--bg-surface)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div
+            className="flex items-center justify-center"
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--gradient-brand)',
+              margin: '0 auto 16px',
+              boxShadow: 'var(--shadow-glow-violet)',
+            }}
+          >
+            <Zap size={24} color="#fff" />
+          </div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, fontFamily: "'Satoshi', 'Inter', system-ui, sans-serif" }}>
+            ClawHub
+          </h1>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
             {isLogin ? 'Welcome back' : 'Create your account'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {!isLogin && (
             <input
               type="text"
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-5 py-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500"
-              style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+              style={inputStyle}
+              onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--accent-blue)'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; }}
             />
           )}
           <input
@@ -67,8 +97,9 @@ export default function AuthForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-5 py-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500"
-            style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            style={inputStyle}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--accent-blue)'; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; }}
           />
           <input
             type="password"
@@ -77,30 +108,50 @@ export default function AuthForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            className="w-full px-5 py-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500"
-            style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            style={inputStyle}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--accent-blue)'; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; }}
           />
 
           {error && (
-            <p className="text-sm text-center py-1" style={{ color: 'var(--danger)' }}>{error}</p>
+            <p style={{ fontSize: 13, textAlign: 'center', color: 'var(--error)', padding: '4px 0' }}>{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-xl text-base font-semibold text-white transition-colors disabled:opacity-50 mt-2"
-            style={{ background: 'var(--accent)' }}
+            style={{
+              width: '100%',
+              padding: '12px 0',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#fff',
+              background: 'var(--gradient-brand)',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.5 : 1,
+              marginTop: 8,
+              fontFamily: 'inherit',
+            }}
           >
             {loading ? '...' : isLogin ? 'Sign In' : 'Sign Up'}
           </button>
         </form>
 
-        <p className="text-center text-sm mt-8" style={{ color: 'var(--text-secondary)' }}>
+        <p style={{ textAlign: 'center', fontSize: 13, marginTop: 32, color: 'var(--text-secondary)' }}>
           {isLogin ? "Don't have an account? " : 'Already have an account? '}
           <button
             onClick={() => { setIsLogin(!isLogin); setError(''); }}
-            className="font-semibold hover:underline"
-            style={{ color: 'var(--accent)' }}
+            style={{
+              fontWeight: 600,
+              color: 'var(--accent-blue)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              fontFamily: 'inherit',
+            }}
           >
             {isLogin ? 'Sign Up' : 'Sign In'}
           </button>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useChannels } from '@/lib/hooks/useChannels';
 import { createClient } from '@/lib/supabase/client';
+import { Zap, Plus, LogOut } from 'lucide-react';
 import ChannelItem from './ChannelItem';
 import CreateChannelModal from './CreateChannelModal';
 
@@ -27,25 +28,58 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-4 flex items-center justify-between">
-        <h1 className="text-lg font-bold">⚡ ClawHub</h1>
+      {/* Sidebar Header */}
+      <div
+        className="flex items-center justify-between flex-shrink-0"
+        style={{
+          padding: '20px 16px',
+          borderBottom: '1px solid var(--border-subtle)',
+        }}
+      >
+        <div className="flex items-center" style={{ gap: 10 }}>
+          <Zap size={20} style={{ color: 'var(--accent-violet)' }} />
+          <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Satoshi', 'Inter', system-ui, sans-serif" }}>
+            ClawHub
+          </span>
+        </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold transition-colors"
-          style={{ background: 'var(--accent)', color: '#fff' }}
+          className="flex items-center justify-center cursor-pointer"
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 'var(--radius-pill)',
+            background: 'var(--gradient-brand)',
+            color: '#fff',
+            border: 'none',
+            fontSize: 16,
+            transition: 'transform 150ms ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--gradient-brand-hover)';
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--gradient-brand)';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
           title="New Channel"
         >
-          +
+          <Plus size={16} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 space-y-1">
+      {/* Channel List */}
+      <div
+        className="flex-1 overflow-y-auto"
+        style={{ padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}
+      >
         {loading ? (
-          <div className="px-3 py-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+          <div style={{ padding: '32px 12px', textAlign: 'center', fontSize: 14, color: 'var(--text-tertiary)' }}>
             Loading...
           </div>
         ) : channels.length === 0 ? (
-          <div className="px-3 py-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+          <div style={{ padding: '32px 12px', textAlign: 'center', fontSize: 14, color: 'var(--text-tertiary)' }}>
             No channels yet.<br />Create one to get started.
           </div>
         ) : (
@@ -60,15 +94,32 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
         )}
       </div>
 
-      <div className="p-3 border-t" style={{ borderColor: 'var(--border)' }}>
+      {/* Footer */}
+      <div
+        style={{
+          position: 'sticky',
+          bottom: 0,
+          padding: '14px 20px',
+          background: 'var(--bg-app)',
+          borderTop: '1px solid var(--border-subtle)',
+        }}
+      >
         <button
           onClick={handleLogout}
-          className="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors"
-          style={{ color: 'var(--text-muted)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+          className="flex items-center w-full cursor-pointer"
+          style={{
+            gap: 8,
+            color: 'var(--text-secondary)',
+            fontSize: 13,
+            background: 'none',
+            border: 'none',
+            padding: 0,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
         >
-          ← Sign Out
+          <LogOut size={12} />
+          Sign Out
         </button>
       </div>
 
