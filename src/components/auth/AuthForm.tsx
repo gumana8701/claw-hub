@@ -41,23 +41,23 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-primary)' }}>
-      <div className="w-full max-w-sm rounded-2xl p-8" style={{ background: 'var(--bg-tertiary)' }}>
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">⚡ ClawHub</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--bg-primary)' }}>
+      <div className="w-full max-w-md rounded-2xl p-10" style={{ background: 'var(--bg-tertiary)' }}>
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold mb-3">⚡ ClawHub</h1>
+          <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
             {isLogin ? 'Welcome back' : 'Create your account'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {!isLogin && (
             <input
               type="text"
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-5 py-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500"
               style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
             />
           )}
@@ -67,7 +67,7 @@ export default function AuthForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-5 py-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500"
             style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
           />
           <input
@@ -77,25 +77,25 @@ export default function AuthForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-5 py-4 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500"
             style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
           />
 
           {error && (
-            <p className="text-sm text-center" style={{ color: 'var(--danger)' }}>{error}</p>
+            <p className="text-sm text-center py-1" style={{ color: 'var(--danger)' }}>{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
+            className="w-full py-4 rounded-xl text-base font-semibold text-white transition-colors disabled:opacity-50 mt-2"
             style={{ background: 'var(--accent)' }}
           >
             {loading ? '...' : isLogin ? 'Sign In' : 'Sign Up'}
           </button>
         </form>
 
-        <p className="text-center text-sm mt-6" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-center text-sm mt-8" style={{ color: 'var(--text-secondary)' }}>
           {isLogin ? "Don't have an account? " : 'Already have an account? '}
           <button
             onClick={() => { setIsLogin(!isLogin); setError(''); }}
