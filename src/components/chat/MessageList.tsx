@@ -12,10 +12,11 @@ interface MessageListProps {
   onLoadMore: () => void;
   currentUserId: string | null;
   agentThinking?: boolean;
+  agentOffline?: boolean;
   pendingCount?: number;
 }
 
-export default function MessageList({ messages, loading, hasMore, onLoadMore, currentUserId, agentThinking, pendingCount }: MessageListProps) {
+export default function MessageList({ messages, loading, hasMore, onLoadMore, currentUserId, agentThinking, agentOffline, pendingCount }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -28,12 +29,11 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
     prevMessageCount.current = messages.length;
   }, [messages.length, autoScroll]);
 
-  // Also scroll when thinking state changes
   useEffect(() => {
-    if (autoScroll && agentThinking) {
+    if (autoScroll && (agentThinking || agentOffline)) {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [agentThinking, autoScroll]);
+  }, [agentThinking, agentOffline, autoScroll]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView();
@@ -62,7 +62,7 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
             <p style={{ fontSize: 14, color: '#5E6D93' }}>Cargando mensajes...</p>
           </div>
-        ) : messages.length === 0 ? (
+        ) : messages.length === 0 && !agentThinking && !agentOffline ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 40, marginBottom: 16 }}>💬</div>
@@ -99,9 +99,12 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
               />
             ))}
 
-            {/* Thinking indicator — shows at bottom of messages */}
+            {/* Thinking or offline indicator */}
             {agentThinking && (
               <ThinkingIndicator pendingCount={pendingCount || 0} />
+            )}
+            {agentOffline && !agentThinking && (
+              <ThinkingIndicator pendingCount={0} isOffline />
             )}
           </div>
         )}

@@ -18,7 +18,7 @@ export default function ChannelPage() {
   const router = useRouter();
   const channelId = params.channelId as string;
   const supabase = createClient();
-  const { messages, loading, hasMore, loadMore, sendMessage, pendingCount, agentThinking } = useMessages(channelId);
+  const { messages, loading, hasMore, loadMore, sendMessage, pendingCount, agentThinking, agentOffline } = useMessages(channelId);
   const [channel, setChannel] = useState<Channel | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [archiving, setArchiving] = useState(false);
@@ -152,6 +152,22 @@ export default function ChannelPage() {
                 </span>
               </div>
             )}
+            {agentOffline && !agentThinking && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '4px 12px',
+                  borderRadius: 9999,
+                  background: 'rgba(245,158,11,0.1)',
+                  flexShrink: 0,
+                }}
+              >
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#F59E0B' }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#F59E0B' }}>Offline</span>
+              </div>
+            )}
 
             {/* Archive button */}
             <button
@@ -256,6 +272,7 @@ export default function ChannelPage() {
         onLoadMore={loadMore}
         currentUserId={userId}
         agentThinking={agentThinking}
+        agentOffline={agentOffline}
         pendingCount={pendingCount}
       />
 

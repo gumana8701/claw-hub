@@ -10,10 +10,12 @@ export function useMessages(channelId: string) {
   const [hasMore, setHasMore] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
   const [agentThinking, setAgentThinking] = useState(false);
+  const [agentOffline, setAgentOffline] = useState(false);
   const supabase = createClient();
   const PAGE_SIZE = 50;
   const subscriptionRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const pendingIdsRef = useRef<Set<string>>(new Set());
+  const thinkingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchMessages = useCallback(async (before?: string) => {
     let query = supabase
@@ -41,16 +43,23 @@ export function useMessages(channelId: string) {
     setLoading(false);
   }, [channelId, supabase]);
 
-  // Detect agent thinking: when last message is from user, agent is likely thinking
-  const updateThinkingState = useCallback((msgs: Message[]) => {
-    if (msgs.length === 0) {
-      setAgentThinking(false);
-      return;
+  const clearThinkingTimeout = useCallback(() => {
+    if (thinkingTimeoutRef.current) {
+      clearTimeout(thinkingTimeoutRef.current);
+      thinkingTimeoutRef.current = null;
     }
-    const last = msgs[msgs.length - 1];
-    const isThinking = last.sender_type === 'user' && pendingIdsRef.current.size > 0;
-    setAgentThinking(isThinking);
   }, []);
+
+  const startThinkingTimeout = useCallback(() => {
+    clearThinkingTimeout();
+    thinkingTimeoutRef.current = setTimeout(() => {
+      // After 30s with no response, mark agent as offline
+      setAgentThinking(false);
+      setAgentOffline(true);
+      pendingIdsRef.current.clear();
+      setPendingCount(0);
+    }, 30000);
+  }, [clearThinkingTimeout]);
 
   useEffect(() => {
     setMessages([]);
@@ -59,6 +68,8 @@ export function useMessages(channelId: string) {
     pendingIdsRef.current.clear();
     setPendingCount(0);
     setAgentThinking(false);
+    setAgentOffline(false);
+    clearThinkingTimeout();
     fetchMessages();
 
     if (subscriptionRef.current) {
@@ -78,11 +89,13 @@ export function useMessages(channelId: string) {
         async (payload) => {
           const newMsg = payload.new as Message;
 
-          // If agent responded, clear all pending
+          // If agent responded, clear all pending + timeout
           if (newMsg.sender_type === 'agent') {
             pendingIdsRef.current.clear();
             setPendingCount(0);
             setAgentThinking(false);
+            setAgentOffline(false);
+            clearThinkingTimeout();
           }
 
           const { data } = await supabase
@@ -92,11 +105,7 @@ export function useMessages(channelId: string) {
             .single();
 
           if (data) {
-            setMessages((prev) => {
-              const updated = [...prev, data];
-              updateThinkingState(updated);
-              return updated;
-            });
+            setMessages((prev) => [...prev, data]);
           }
         }
       )
@@ -106,8 +115,9 @@ export function useMessages(channelId: string) {
 
     return () => {
       supabase.removeChannel(channel);
+      clearThinkingTimeout();
     };
-  }, [channelId, fetchMessages, supabase, updateThinkingState]);
+  }, [channelId, fetchMessages, supabase, clearThinkingTimeout]);
 
   const loadMore = useCallback(async () => {
     if (messages.length > 0 && hasMore) {
@@ -125,6 +135,8 @@ export function useMessages(channelId: string) {
     pendingIdsRef.current.add(tempId);
     setPendingCount(pendingIdsRef.current.size);
     setAgentThinking(true);
+    setAgentOffline(false);
+    startThinkingTimeout();
 
     const { error } = await supabase.from('messages').insert({
       channel_id: channelId,
@@ -136,9 +148,13 @@ export function useMessages(channelId: string) {
     if (error) {
       pendingIdsRef.current.delete(tempId);
       setPendingCount(pendingIdsRef.current.size);
+      if (pendingIdsRef.current.size === 0) {
+        setAgentThinking(false);
+        clearThinkingTimeout();
+      }
       throw error;
     }
   };
 
-  return { messages, loading, hasMore, loadMore, sendMessage, pendingCount, agentThinking };
+  return { messages, loading, hasMore, loadMore, sendMessage, pendingCount, agentThinking, agentOffline };
 }
