@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useChannels } from '@/lib/hooks/useChannels';
 import { createClient } from '@/lib/supabase/client';
-import { Zap, Plus, LogOut } from 'lucide-react';
 import ChannelItem from './ChannelItem';
 import CreateChannelModal from './CreateChannelModal';
 
@@ -27,60 +26,68 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Sidebar Header */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Header — like Discord server name */}
       <div
-        className="flex items-center justify-between flex-shrink-0"
         style={{
-          padding: '20px 16px',
-          borderBottom: '1px solid var(--border-subtle)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 16px',
+          height: 56,
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          flexShrink: 0,
         }}
       >
-        <div className="flex items-center" style={{ gap: 10 }}>
-          <Zap size={20} style={{ color: 'var(--accent-violet)' }} />
-          <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Satoshi', 'Inter', system-ui, sans-serif" }}>
-            ClawHub
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 18, lineHeight: 1 }}>⚡</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>ClawHub</span>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center justify-center cursor-pointer"
           style={{
             width: 28,
             height: 28,
-            borderRadius: 'var(--radius-pill)',
-            background: 'var(--gradient-brand)',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
             color: '#fff',
             border: 'none',
-            fontSize: 16,
-            transition: 'transform 150ms ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--gradient-brand-hover)';
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'var(--gradient-brand)';
-            e.currentTarget.style.transform = 'scale(1)';
+            fontSize: 18,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            lineHeight: 1,
           }}
           title="New Channel"
         >
-          <Plus size={16} />
+          +
         </button>
       </div>
 
-      {/* Channel List */}
+      {/* Channel list — like Discord channel list */}
       <div
-        className="flex-1 overflow-y-auto"
-        style={{ padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '12px 8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+        }}
       >
+        {/* Section header */}
+        <div style={{ padding: '8px 12px 12px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5E6D93' }}>
+          Agents — {channels.length}
+        </div>
+
         {loading ? (
-          <div style={{ padding: '32px 12px', textAlign: 'center', fontSize: 14, color: 'var(--text-tertiary)' }}>
+          <div style={{ padding: '40px 16px', textAlign: 'center', fontSize: 13, color: '#5E6D93' }}>
             Loading...
           </div>
         ) : channels.length === 0 ? (
-          <div style={{ padding: '32px 12px', textAlign: 'center', fontSize: 14, color: 'var(--text-tertiary)' }}>
-            No channels yet.<br />Create one to get started.
+          <div style={{ padding: '40px 16px', textAlign: 'center', fontSize: 13, color: '#5E6D93' }}>
+            No channels yet.<br />Click + to create one.
           </div>
         ) : (
           channels.map((ch) => (
@@ -94,32 +101,34 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
         )}
       </div>
 
-      {/* Footer */}
+      {/* User area — like Discord user panel */}
       <div
         style={{
-          position: 'sticky',
-          bottom: 0,
-          padding: '14px 20px',
-          background: 'var(--bg-app)',
-          borderTop: '1px solid var(--border-subtle)',
+          padding: '12px 16px',
+          background: '#070E1E',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          flexShrink: 0,
         }}
       >
         <button
           onClick={handleLogout}
-          className="flex items-center w-full cursor-pointer"
           style={{
+            display: 'flex',
+            alignItems: 'center',
             gap: 8,
-            color: 'var(--text-secondary)',
+            color: '#8E9CBC',
             fontSize: 13,
             background: 'none',
             border: 'none',
-            padding: 0,
+            cursor: 'pointer',
+            padding: '6px 4px',
+            borderRadius: 6,
+            width: '100%',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = '#8E9CBC'; }}
         >
-          <LogOut size={12} />
-          Sign Out
+          ← Sign Out
         </button>
       </div>
 

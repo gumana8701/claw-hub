@@ -1,61 +1,64 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu } from 'lucide-react';
 import ChannelList from '@/components/sidebar/ChannelList';
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex overflow-hidden" style={{ height: '100dvh' }}>
+    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#050A1A' }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 md:hidden"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setSidebarOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 30, background: 'rgba(0,0,0,0.6)' }}
+          className="md:hidden"
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Discord style: dark panel, 260px */}
       <aside
         className={`
-          fixed md:relative z-40 h-full flex-shrink-0
+          fixed md:relative z-40 h-full
           transform transition-transform duration-200 ease-in-out
           md:translate-x-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
         style={{
           width: 260,
-          background: 'var(--bg-surface)',
-          borderRight: '1px solid var(--border-subtle)',
+          flexShrink: 0,
+          background: '#0A1122',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         <ChannelList onChannelSelect={() => setSidebarOpen(false)} />
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col" style={{ minWidth: 0 }}>
-        {/* Mobile header */}
+      {/* Main content area */}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, background: '#050A1A' }}>
+        {/* Mobile hamburger header */}
         <div
-          className="md:hidden flex items-center flex-shrink-0"
+          className="md:hidden"
           style={{
-            gap: 12,
-            padding: '0 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            padding: '0 20px',
             height: 56,
-            borderBottom: '1px solid var(--border-subtle)',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            flexShrink: 0,
           }}
         >
           <button
             onClick={() => setSidebarOpen(true)}
-            style={{ color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: '#8E9CBC', cursor: 'pointer', fontSize: 20, padding: 4 }}
           >
-            <Menu size={20} />
+            ☰
           </button>
-          <span style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Satoshi', 'Inter', system-ui, sans-serif" }}>
-            ClawHub
-          </span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>ClawHub</span>
         </div>
 
         {children}

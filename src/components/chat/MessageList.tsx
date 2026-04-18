@@ -32,9 +32,7 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
   const handleScroll = () => {
     const el = containerRef.current;
     if (!el) return;
-    if (el.scrollTop < 100 && hasMore && !loading) {
-      onLoadMore();
-    }
+    if (el.scrollTop < 100 && hasMore && !loading) onLoadMore();
     const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
     setAutoScroll(isNearBottom);
   };
@@ -43,34 +41,40 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto"
-      style={{ padding: '24px 32px', scrollBehavior: 'smooth' }}
+      style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '24px 0',
+      }}
     >
-      <div style={{ maxWidth: 780, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Centered content container — like Discord's max-width chat */}
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 32px', width: '100%' }}>
         {loading && messages.length === 0 ? (
-          <div className="flex items-center justify-center" style={{ height: '100%', minHeight: 200 }}>
-            <p style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>Loading messages...</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+            <p style={{ fontSize: 14, color: '#5E6D93' }}>Loading messages...</p>
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex items-center justify-center" style={{ height: '100%', minHeight: 200 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: 32, marginBottom: 12 }}>💬</p>
-              <p style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>No messages yet. Start the conversation!</p>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>💬</div>
+              <p style={{ fontSize: 15, color: '#5E6D93', lineHeight: 1.6 }}>
+                No messages yet.<br />Start the conversation!
+              </p>
             </div>
           </div>
         ) : (
-          <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {hasMore && (
-              <div style={{ textAlign: 'center', padding: '12px 0' }}>
+              <div style={{ textAlign: 'center', padding: '16px 0' }}>
                 <button
                   onClick={onLoadMore}
                   style={{
                     fontSize: 12,
-                    padding: '6px 16px',
-                    borderRadius: 'var(--radius-pill)',
-                    background: 'var(--bg-surface-raised)',
-                    color: 'var(--text-secondary)',
-                    border: '1px solid var(--border-subtle)',
+                    padding: '6px 20px',
+                    borderRadius: 9999,
+                    background: '#131B36',
+                    color: '#8E9CBC',
+                    border: '1px solid rgba(255,255,255,0.06)',
                     cursor: 'pointer',
                   }}
                 >
@@ -85,7 +89,7 @@ export default function MessageList({ messages, loading, hasMore, onLoadMore, cu
                 isOwn={msg.sender_id === currentUserId}
               />
             ))}
-          </>
+          </div>
         )}
         <div ref={bottomRef} />
       </div>

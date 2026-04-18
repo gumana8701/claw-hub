@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState, useCallback } from 'react';
-import { Paperclip } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 interface FileUploadProps {
@@ -23,12 +22,10 @@ export default function FileUpload({ onUploaded }: FileUploadProps) {
   const uploadFile = useCallback(async (file: File) => {
     setUploading(true);
     setProgress(0);
-
     try {
-      const timestamp = Date.now();
+      const ts = Date.now();
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const filePath = `${timestamp}-${safeName}`;
-
+      const filePath = `${ts}-${safeName}`;
       const { data: { session } } = await supabase.auth.getSession();
       const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/attachments/${filePath}`;
 
@@ -37,30 +34,18 @@ export default function FileUpload({ onUploaded }: FileUploadProps) {
         xhr.open('POST', url);
         xhr.setRequestHeader('Authorization', `Bearer ${session?.access_token}`);
         xhr.setRequestHeader('x-upsert', 'true');
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
-        };
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error(`Upload failed: ${xhr.status}`));
-        };
+        xhr.upload.onprogress = (e) => { if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100)); };
+        xhr.onload = () => { xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)); };
         xhr.onerror = () => reject(new Error('Upload failed'));
         xhr.send(file);
       });
 
       const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(filePath);
-
       let messageType: 'file' | 'image' | 'audio' = 'file';
       if (file.type.startsWith('image/')) messageType = 'image';
       else if (file.type.startsWith('audio/')) messageType = 'audio';
 
-      onUploaded({
-        file_url: urlData.publicUrl,
-        file_name: file.name,
-        file_size: file.size,
-        file_type: file.type,
-        message_type: messageType,
-      });
+      onUploaded({ file_url: urlData.publicUrl, file_name: file.name, file_size: file.size, file_type: file.type, message_type: messageType });
     } catch (err) {
       console.error('Upload failed:', err);
     } finally {
@@ -76,50 +61,48 @@ export default function FileUpload({ onUploaded }: FileUploadProps) {
   };
 
   return (
-    <div className="relative">
-      <input ref={inputRef} type="file" onChange={handleChange} className="hidden" accept="*/*" />
+    <>
+      <input ref={inputRef} type="file" onChange={handleChange} style={{ display: 'none' }} accept="*/*" />
       {uploading ? (
         <div
-          className="flex items-center justify-center relative"
-          style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: 'var(--bg-surface-hover)' }}
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 8,
+            background: '#1E2849',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 10,
+            fontWeight: 700,
+            color: '#3B82F6',
+          }}
         >
-          <svg className="-rotate-90" width="20" height="20" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" fill="none" stroke="var(--border-default)" strokeWidth="2" />
-            <circle
-              cx="12" cy="12" r="10" fill="none"
-              stroke="var(--accent-blue)" strokeWidth="2"
-              strokeDasharray={`${progress * 0.628} 62.8`}
-              strokeLinecap="round"
-            />
-          </svg>
+          {progress}%
         </div>
       ) : (
         <button
           onClick={() => inputRef.current?.click()}
-          className="flex items-center justify-center"
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: 'var(--radius-md)',
+            width: 34,
+            height: 34,
+            borderRadius: 8,
             background: 'transparent',
             border: 'none',
-            color: 'var(--text-tertiary)',
+            color: '#5E6D93',
             cursor: 'pointer',
-            transition: 'all 150ms',
+            fontSize: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--bg-surface-hover)';
-            e.currentTarget.style.color = 'var(--text-secondary)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = 'var(--text-tertiary)';
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = '#1E2849'; e.currentTarget.style.color = '#8E9CBC'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#5E6D93'; }}
           title="Attach file"
         >
-          <Paperclip size={16} />
+          📎
         </button>
       )}
-    </div>
+    </>
   );
 }

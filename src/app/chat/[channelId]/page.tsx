@@ -9,12 +9,7 @@ import MessageInput from '@/components/chat/MessageInput';
 import type { Channel, Message } from '@/types/database';
 
 function getInitials(name: string): string {
-  return name
-    .split(/[\s-]+/)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  return name.split(/[\s-]+/).filter(Boolean).map((w) => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
 export default function ChannelPage() {
@@ -54,49 +49,56 @@ export default function ChannelPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
-      {/* Chat header */}
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      {/* Channel header — Discord style: 48px with channel name */}
       <div
-        className="flex items-center flex-shrink-0"
         style={{
-          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
           padding: '0 24px',
-          borderBottom: '1px solid var(--border-subtle)',
-          gap: 12,
+          height: 56,
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          flexShrink: 0,
+          background: '#050A1A',
         }}
       >
         {channel ? (
           <>
             <div
-              className="flex items-center justify-center flex-shrink-0"
               style={{
                 width: 36,
                 height: 36,
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--bg-surface-raised)',
+                borderRadius: 8,
+                background: '#131B36',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 fontSize: 13,
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
+                fontWeight: 700,
+                color: '#8E9CBC',
+                flexShrink: 0,
               }}
             >
               {getInitials(channel.name)}
             </div>
-            <div className="flex flex-col" style={{ gap: 2 }}>
-              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', lineHeight: '20px' }}>
                 {channel.name}
-              </span>
+              </div>
               {channel.description && (
-                <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-tertiary)' }}>
+                <div style={{ fontSize: 12, color: '#5E6D93', lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {channel.description}
-                </span>
+                </div>
               )}
             </div>
           </>
         ) : (
-          <div style={{ height: 20, width: 128, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface-raised)' }} />
+          <div style={{ height: 20, width: 140, borderRadius: 6, background: '#131B36' }} />
         )}
       </div>
 
+      {/* Messages */}
       <MessageList
         messages={messages}
         loading={loading}
@@ -105,6 +107,7 @@ export default function ChannelPage() {
         currentUserId={userId}
       />
 
+      {/* Input */}
       <MessageInput onSendText={handleSendText} onSendFile={handleSendFile} />
     </div>
   );
