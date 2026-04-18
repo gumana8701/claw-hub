@@ -26,28 +26,27 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header — like Discord server name */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#0B1120' }}>
+      {/* Header */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '16px 16px',
-          height: 56,
+          padding: '18px 18px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           flexShrink: 0,
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 18, lineHeight: 1 }}>⚡</span>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>ClawHub</span>
+          <span style={{ fontSize: 20, lineHeight: 1 }}>⚡</span>
+          <span style={{ fontSize: 17, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>ClawHub</span>
         </div>
         <button
           onClick={() => setShowCreate(true)}
           style={{
-            width: 28,
-            height: 28,
+            width: 30,
+            height: 30,
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
             color: '#fff',
@@ -65,28 +64,25 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
         </button>
       </div>
 
-      {/* Channel list — like Discord channel list */}
+      {/* Section label */}
+      <div style={{ padding: '16px 18px 8px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4B5B80' }}>
+        Agents — {channels.length}
+      </div>
+
+      {/* Channel list */}
       <div
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '12px 8px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
+          padding: '4px 10px 16px',
         }}
       >
-        {/* Section header */}
-        <div style={{ padding: '8px 12px 12px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5E6D93' }}>
-          Agents — {channels.length}
-        </div>
-
         {loading ? (
-          <div style={{ padding: '40px 16px', textAlign: 'center', fontSize: 13, color: '#5E6D93' }}>
+          <div style={{ padding: '48px 16px', textAlign: 'center', fontSize: 13, color: '#4B5B80' }}>
             Loading...
           </div>
         ) : channels.length === 0 ? (
-          <div style={{ padding: '40px 16px', textAlign: 'center', fontSize: 13, color: '#5E6D93' }}>
+          <div style={{ padding: '48px 16px', textAlign: 'center', fontSize: 13, color: '#4B5B80', lineHeight: 1.6 }}>
             No channels yet.<br />Click + to create one.
           </div>
         ) : (
@@ -101,11 +97,11 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
         )}
       </div>
 
-      {/* User area — like Discord user panel */}
+      {/* Footer */}
       <div
         style={{
-          padding: '12px 16px',
-          background: '#070E1E',
+          padding: '14px 18px',
+          background: '#070D1A',
           borderTop: '1px solid rgba(255,255,255,0.06)',
           flexShrink: 0,
         }}
@@ -116,17 +112,17 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            color: '#8E9CBC',
+            color: '#6B7BA0',
             fontSize: 13,
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            padding: '6px 4px',
+            padding: '8px 4px',
             borderRadius: 6,
             width: '100%',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = '#8E9CBC'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#CBD5E1'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = '#6B7BA0'; }}
         >
           ← Sign Out
         </button>

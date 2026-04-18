@@ -10,7 +10,9 @@ interface ChannelItemProps {
 }
 
 function getInitials(name: string): string {
-  return name
+  // Remove leading number + separator (e.g. "1 · " or "10 · ")
+  const clean = name.replace(/^\d+\s*[·\-]\s*/, '');
+  return clean
     .split(/[\s-]+/)
     .filter(Boolean)
     .map((w) => w[0])
@@ -19,7 +21,21 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+// Stable color based on channel name
+function getAvatarColor(name: string): string {
+  const colors = [
+    '#3B82F6', '#8B5CF6', '#EC4899', '#EF4444', '#F59E0B',
+    '#22C55E', '#06B6D4', '#6366F1', '#F97316', '#14B8A6',
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
 export default function ChannelItem({ channel, isActive, onClick }: ChannelItemProps) {
+  const initials = getInitials(channel.name);
+  const color = getAvatarColor(channel.name);
+
   return (
     <Link
       href={`/chat/${channel.id}`}
@@ -28,50 +44,51 @@ export default function ChannelItem({ channel, isActive, onClick }: ChannelItemP
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        padding: '10px 12px',
-        borderRadius: 8,
+        padding: '12px 14px',
+        marginBottom: 4,
+        borderRadius: 10,
         cursor: 'pointer',
         textDecoration: 'none',
         background: isActive
           ? 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)'
           : 'transparent',
-        boxShadow: isActive ? '0 0 24px rgba(124, 58, 237, 0.25)' : 'none',
-        transition: 'background 150ms ease',
+        boxShadow: isActive ? '0 0 20px rgba(124, 58, 237, 0.2)' : 'none',
+        transition: 'background 120ms ease',
       }}
       onMouseEnter={(e) => {
-        if (!isActive) e.currentTarget.style.background = '#1E2849';
+        if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
       }}
       onMouseLeave={(e) => {
         if (!isActive) e.currentTarget.style.background = 'transparent';
       }}
     >
-      {/* Avatar — Discord style: square with rounded corners */}
+      {/* Avatar */}
       <div
         style={{
-          width: 34,
-          height: 34,
-          borderRadius: 8,
-          background: isActive ? 'rgba(255,255,255,0.15)' : '#131B36',
+          width: 36,
+          height: 36,
+          borderRadius: 10,
+          background: isActive ? 'rgba(255,255,255,0.2)' : color,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: 700,
-          color: isActive ? '#fff' : '#8E9CBC',
+          color: '#fff',
           flexShrink: 0,
           letterSpacing: '0.02em',
         }}
       >
-        {getInitials(channel.name)}
+        {initials}
       </div>
 
       {/* Text block */}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <div
           style={{
             fontSize: 14,
-            fontWeight: 500,
-            color: isActive ? '#fff' : '#e2e8f0',
+            fontWeight: isActive ? 600 : 500,
+            color: isActive ? '#fff' : '#CBD5E1',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -85,7 +102,7 @@ export default function ChannelItem({ channel, isActive, onClick }: ChannelItemP
             style={{
               fontSize: 12,
               fontWeight: 400,
-              color: isActive ? 'rgba(255,255,255,0.7)' : '#5E6D93',
+              color: isActive ? 'rgba(255,255,255,0.65)' : '#4B5B80',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',

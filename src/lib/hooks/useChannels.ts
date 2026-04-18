@@ -13,10 +13,16 @@ export function useChannels() {
     const { data, error } = await supabase
       .from('channels')
       .select('*')
-      .order('created_at', { ascending: true });
+      .order('name', { ascending: true });
 
     if (!error && data) {
-      setChannels(data);
+      // Sort by leading number if present (e.g. "1 · Axis" before "2 · Privado")
+      const sorted = data.sort((a, b) => {
+        const numA = parseInt(a.name.match(/^(\d+)/)?.[1] || '999');
+        const numB = parseInt(b.name.match(/^(\d+)/)?.[1] || '999');
+        return numA - numB;
+      });
+      setChannels(sorted);
     }
     setLoading(false);
   }, [supabase]);
@@ -29,17 +35,7 @@ export function useChannels() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'channels' },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setChannels((prev) => [...prev, payload.new as Channel]);
-          } else if (payload.eventType === 'UPDATE') {
-            setChannels((prev) =>
-              prev.map((ch) => (ch.id === (payload.new as Channel).id ? (payload.new as Channel) : ch))
-            );
-          } else if (payload.eventType === 'DELETE') {
-            setChannels((prev) => prev.filter((ch) => ch.id !== (payload.old as Channel).id));
-          }
-        }
+        () => { fetchChannels(); }
       )
       .subscribe();
 
