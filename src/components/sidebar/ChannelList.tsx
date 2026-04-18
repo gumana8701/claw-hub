@@ -14,15 +14,28 @@ interface ChannelListProps {
 export default function ChannelList({ onChannelSelect }: ChannelListProps) {
   const { channels, loading, createChannel } = useChannels();
   const [showCreate, setShowCreate] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   const params = useParams();
   const router = useRouter();
   const supabase = createClient();
   const activeId = params?.channelId as string | undefined;
 
+  const activeChannels = channels.filter((ch) => !(ch as Record<string, unknown>).archived);
+  const archivedChannels = channels.filter((ch) => (ch as Record<string, unknown>).archived);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/login');
     router.refresh();
+  };
+
+  const handleUnarchive = async (channelId: string) => {
+    try {
+      await fetch(`/api/archive/${channelId}`, { method: 'DELETE' });
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -66,10 +79,10 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
 
       {/* Section label */}
       <div style={{ padding: '16px 18px 8px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4B5B80' }}>
-        Agents — {channels.length}
+        Agentes — {activeChannels.length}
       </div>
 
-      {/* Channel list */}
+      {/* Active channels */}
       <div
         style={{
           flex: 1,
@@ -81,12 +94,12 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
           <div style={{ padding: '48px 16px', textAlign: 'center', fontSize: 13, color: '#4B5B80' }}>
             Loading...
           </div>
-        ) : channels.length === 0 ? (
+        ) : activeChannels.length === 0 ? (
           <div style={{ padding: '48px 16px', textAlign: 'center', fontSize: 13, color: '#4B5B80', lineHeight: 1.6 }}>
-            No channels yet.<br />Click + to create one.
+            No hay canales activos.<br />Click + para crear uno.
           </div>
         ) : (
-          channels.map((ch) => (
+          activeChannels.map((ch) => (
             <ChannelItem
               key={ch.id}
               channel={ch}
@@ -94,6 +107,82 @@ export default function ChannelList({ onChannelSelect }: ChannelListProps) {
               onClick={onChannelSelect}
             />
           ))
+        )}
+
+        {/* Archived section */}
+        {archivedChannels.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 12px',
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: '#4B5B80',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                width: '100%',
+              }}
+            >
+              <span style={{ transform: showArchived ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 150ms', display: 'inline-block' }}>▶</span>
+              Archivados — {archivedChannels.length}
+            </button>
+
+            {showArchived && archivedChannels.map((ch) => (
+              <div
+                key={ch.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 14px',
+                  marginBottom: 2,
+                  borderRadius: 8,
+                  opacity: 0.5,
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    background: '#131B36',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#4B5B80',
+                  }}
+                >
+                  📦
+                </div>
+                <div style={{ flex: 1, fontSize: 13, color: '#5E6D93' }}>
+                  {ch.name}
+                </div>
+                <button
+                  onClick={() => handleUnarchive(ch.id)}
+                  style={{
+                    fontSize: 11,
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    background: '#1E2849',
+                    color: '#8E9CBC',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Restaurar
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

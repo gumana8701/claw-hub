@@ -1,24 +1,30 @@
 {
-  "name": "ClawHub",
+  "name": "ClawHub — AI Agent Hub",
   "short_name": "ClawHub",
-  "description": "Unified AI Agent Communication Hub",
+  "description": "Unified AI Agent Communication Hub by OpenClaw",
   "start_url": "/chat",
   "display": "standalone",
-  "background_color": "#1a1a2e",
-  "theme_color": "#1a1a2e",
-  "orientation": "any",
+  "background_color": "#050A1A",
+  "theme_color": "#050A1A",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
