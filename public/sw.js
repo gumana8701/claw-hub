@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clawhub-v1';
+const CACHE_NAME = 'clawhub-v2';
 const PRECACHE_URLS = ['/', '/chat'];
 
 self.addEventListener('install', (event) => {
