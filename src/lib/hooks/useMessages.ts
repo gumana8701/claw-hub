@@ -154,20 +154,9 @@ export function useMessages(channelId: string) {
       throw error;
     }
 
-    // Fire-and-forget: call agent webhook via our API
-    fetch(`/api/agent/${channelId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: data.content,
-        message_type: data.message_type,
-        file_url: data.file_url,
-        file_name: data.file_name,
-      }),
-    }).catch((err) => {
-      console.error('Agent call failed:', err);
-      // Don't throw — message is already saved, agent will process when available
-    });
+    // Agent responses come from external bridge (OpenClaw heartbeat/cron).
+    // DO NOT call /api/agent/ here — it caused an echo bug where the old
+    // route forwarded user text to the webhook, inserting it as agent reply.
   };
 
   return { messages, loading, hasMore, loadMore, sendMessage, pendingCount, agentThinking, agentOffline };
