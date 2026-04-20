@@ -165,7 +165,7 @@ export default function ChannelPage() {
                 }}
               >
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#F59E0B' }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#F59E0B' }}>Offline</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#F59E0B' }}>Procesando</span>
               </div>
             )}
 

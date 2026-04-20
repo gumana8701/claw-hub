@@ -41,9 +41,9 @@ export default function ThinkingIndicator({ pendingCount, isOffline }: ThinkingI
               gap: 10,
             }}
           >
-            <span style={{ fontSize: 14 }}>⚠️</span>
+            <span style={{ fontSize: 14 }}>⏳</span>
             <span style={{ fontSize: 13, color: '#8E9CBC' }}>
-              Agente no conectado — tus mensajes se procesarán cuando el agente esté online
+              Procesando tu mensaje — el agente responderá en breve
             </span>
           </div>
         </div>

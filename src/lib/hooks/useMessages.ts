@@ -57,7 +57,7 @@ export function useMessages(channelId: string) {
       setAgentOffline(true);
       pendingIdsRef.current.clear();
       setPendingCount(0);
-    }, 60000); // 60s timeout (agent webhook has 55s)
+    }, 300000); // 5 min timeout — agents respond via external bridge, not instant
   }, [clearThinkingTimeout]);
 
   useEffect(() => {
