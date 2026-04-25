@@ -78,7 +78,7 @@ export async function POST(
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-haiku-4-20250414',
       max_tokens: 1024,
       system: getAgentPrompt(channel.agent_name),
       messages: history,
