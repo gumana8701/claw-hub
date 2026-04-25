@@ -117,6 +117,21 @@ export default function AuthForm() {
             <p style={{ fontSize: 13, textAlign: 'center', color: 'var(--error)', padding: '4px 0' }}>{error}</p>
           )}
 
+          {isLogin && (
+            <a
+              href="/reset-password"
+              style={{
+                fontSize: 13,
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                textAlign: 'right',
+                marginTop: -8,
+              }}
+            >
+              Forgot password?
+            </a>
+          )}
+
           <button
             type="submit"
             disabled={loading}

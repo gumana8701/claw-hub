@@ -154,9 +154,13 @@ export function useMessages(channelId: string) {
       throw error;
     }
 
-    // Agent responses come from external bridge (OpenClaw heartbeat/cron).
-    // DO NOT call /api/agent/ here — it caused an echo bug where the old
-    // route forwarded user text to the webhook, inserting it as agent reply.
+    // Fire-and-forget: trigger agent AI response
+    // The agent route calls Claude and inserts the response into DB.
+    // Realtime subscription picks it up automatically.
+    fetch(`/api/agent/${channelId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    }).catch(() => {}); // Silently ignore — response arrives via realtime
   };
 
   return { messages, loading, hasMore, loadMore, sendMessage, pendingCount, agentThinking, agentOffline };
